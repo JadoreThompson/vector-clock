@@ -5,11 +5,13 @@ public interface VectorClock {
 
     void increment();
 
-    long[] getClock();
+    long[] getVectorClock();
 
     boolean happensBefore(VectorClock other);
 
     boolean happensAfter(VectorClock other);
 
     boolean isConcurrent(VectorClock other);
+
+    int getId();
 }

@@ -3,8 +3,8 @@ package com.zenz.vector_clock;
 import java.util.Arrays;
 
 public class DistributedVectorClock implements VectorClock {
-    private long[] vectorClock;
-    private final int id;
+    long[] vectorClock;
+    final int id;
 
     public DistributedVectorClock(int id) {
         this.id = id;
@@ -26,14 +26,12 @@ public class DistributedVectorClock implements VectorClock {
 
     @Override
     public void merge(VectorClock other) {
-        long[] otherClock = other.getClock();
+        long[] otherClock = other.getVectorClock();
         ensureCapacity(otherClock.length);
 
         for (int i = 0; i < otherClock.length; i++) {
             vectorClock[i] = Math.max(vectorClock[i], otherClock[i]);
         }
-
-        vectorClock[id]++;
     }
 
     /**
@@ -63,7 +61,15 @@ public class DistributedVectorClock implements VectorClock {
      */
     @Override
     public boolean happensBefore(VectorClock other) {
-        long[] otherClock = other.getClock();
+        if (Arrays.stream(vectorClock).allMatch(v -> v == 0L)) {
+            throw new VectorClockException("Node " + id + " has empty vector clock");
+        }
+
+        if (Arrays.stream(other.getVectorClock()).allMatch(v -> v == 0L)) {
+            throw new VectorClockException("Node " + other.getId() + " has empty vector clock");
+        }
+
+        long[] otherClock = other.getVectorClock();
         int maxLen = Math.max(vectorClock.length, otherClock.length);
 
         boolean strictlyLess = false;
@@ -88,17 +94,23 @@ public class DistributedVectorClock implements VectorClock {
 
     @Override
     public boolean isConcurrent(VectorClock other) {
+        if (Arrays.equals(vectorClock, other.getVectorClock())) return false;
         return !happensBefore(other) && !happensAfter(other);
     }
 
     @Override
-    public long[] getClock() {
+    public long[] getVectorClock() {
         return Arrays.copyOf(vectorClock, vectorClock.length);
     }
 
-    private void ensureCapacity(int size) {
+    void ensureCapacity(int size) {
         if (vectorClock.length < size) {
             vectorClock = Arrays.copyOf(vectorClock, size);
         }
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 }
