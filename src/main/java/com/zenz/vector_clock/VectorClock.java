@@ -3,6 +3,8 @@ package com.zenz.vector_clock;
 public interface VectorClock {
     void merge(VectorClock other);
 
+    void increment();
+
     long[] getClock();
 
     boolean happensBefore(VectorClock other);
