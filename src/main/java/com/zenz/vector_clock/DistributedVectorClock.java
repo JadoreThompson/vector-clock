@@ -21,7 +21,6 @@ public class DistributedVectorClock implements VectorClock {
     }
 
     public void increment() {
-        ensureCapacity(id + 1);
         vectorClock[id]++;
     }
 
