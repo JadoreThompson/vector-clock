@@ -1,18 +1,20 @@
 package com.zenz.vector_clock;
 
-public abstract class BaseVectorClock<T extends BaseVectorClock<T>> {
+public interface BaseVectorClock<T extends BaseVectorClock<T, C>, C> {
 
-    public abstract void increment();
+    void increment();
 
-    public abstract void merge(T other);
+    void merge(T other);
 
-    public abstract boolean happensBefore(T other);
+    boolean happensBefore(T other);
 
-    public abstract boolean happensAfter(T other);
+    boolean happensAfter(T other);
 
-    public abstract boolean isConcurrent(T other);
+    boolean isConcurrent(T other);
 
-    public abstract T duplicate();
+    T duplicate();
 
-    public abstract String getId();
+    String getId();
+
+    C getClock();
 }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * Maintains a hash map to keep track of each node's counter
  */
-public final class MapVectorClock extends BaseVectorClock<MapVectorClock> {
+public final class MapVectorClock implements BaseVectorClock<MapVectorClock, HashMap<String, Long>> {
 
     private final HashMap<String, Long> counters;
     private final String id;
@@ -77,5 +77,10 @@ public final class MapVectorClock extends BaseVectorClock<MapVectorClock> {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public HashMap<String, Long> getClock() {
+        return new HashMap<>(this.counters);
     }
 }
