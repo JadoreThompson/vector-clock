@@ -2,9 +2,9 @@ package com.zenz.vector_clock;
 
 import java.util.Arrays;
 
-public class DistributedVectorClock implements VectorClock {
-    long[] vectorClock;
-    final int id;
+public final class DistributedVectorClock implements VectorClock {
+    private long[] vectorClock;
+    private final int id;
 
     public DistributedVectorClock(int id) {
         this.id = id;
@@ -112,5 +112,20 @@ public class DistributedVectorClock implements VectorClock {
     @Override
     public int getId() {
         return id;
+    }
+
+    @Override
+    public DistributedVectorClock duplicate() {
+        DistributedVectorClock newVectorClock = new DistributedVectorClock(this.id);
+        newVectorClock.vectorClock = Arrays.copyOf(vectorClock, vectorClock.length);
+        return newVectorClock;
+    }
+
+    @Override
+    public String toString() {
+        return "DistributedVectorClock{" +
+                "vectorClock=" + Arrays.toString(vectorClock) +
+                ", id=" + id +
+                '}';
     }
 }

@@ -14,4 +14,6 @@ public interface VectorClock {
     boolean isConcurrent(VectorClock other);
 
     int getId();
+
+    VectorClock duplicate();
 }

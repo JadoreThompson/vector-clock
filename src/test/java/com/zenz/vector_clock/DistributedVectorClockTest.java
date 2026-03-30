@@ -299,6 +299,4 @@ public class DistributedVectorClockTest {
         Assertions.assertFalse(v.isConcurrent(w), "V=[1,1,2] happens before W=[1,1,3]");
         Assertions.assertTrue(v.happensBefore(w), "V=[1,1,2] should happen before W=[1,1,3]");
     }
-
-    // === re-ordering tests ===
 }
