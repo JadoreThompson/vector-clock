@@ -5,8 +5,7 @@ import java.util.HashMap;
 /**
  * Maintains a hash map to keep track of each node's counter
  */
-
-public class MapVectorClock extends BaseVectorClock<MapVectorClock> {
+public final class MapVectorClock extends BaseVectorClock<MapVectorClock> {
 
     private final HashMap<String, Long> counters;
     private final String id;
@@ -29,7 +28,13 @@ public class MapVectorClock extends BaseVectorClock<MapVectorClock> {
     @Override
     public void merge(MapVectorClock other) {
         for (String key : other.counters.keySet()) {
-            this.counters.put(key, Math.max(this.counters.get(key), other.counters.get(key)));
+            this.counters.put(
+                    key,
+                    Math.max(
+                            this.counters.getOrDefault(key, 0L),
+                            other.counters.getOrDefault(key, 0L)
+                    )
+            );
         }
     }
 
@@ -39,8 +44,8 @@ public class MapVectorClock extends BaseVectorClock<MapVectorClock> {
         boolean strictlyLess = false;
 
         for (String key : clocks.keySet()) {
-            long a = this.counters.get(key);
-            long b = clocks.get(key);
+            long a = this.counters.getOrDefault(key, 0L);
+            long b = other.counters.getOrDefault(key, 0L);
 
             if (a > b) {
                 return false;
@@ -61,14 +66,13 @@ public class MapVectorClock extends BaseVectorClock<MapVectorClock> {
 
     @Override
     public boolean isConcurrent(MapVectorClock other) {
-        return !happensBefore(other) && happensAfter(other);
+        return !happensBefore(other) && !happensAfter(other);
     }
 
     @Override
     public MapVectorClock duplicate() {
         return new MapVectorClock(this.id, new HashMap<>(this.counters));
     }
-
 
     @Override
     public String getId() {
