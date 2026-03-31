@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Maintains a hash map to keep track of each node's counter
+ * Hash map backed implementation of a vector clock
  */
-public final class MapVectorClock implements BaseVectorClock<MapVectorClock, HashMap<String, Long>> {
+public final class MapVectorClock {
 
     private final HashMap<String, Long> counters;
     private final String id;
@@ -23,12 +23,12 @@ public final class MapVectorClock implements BaseVectorClock<MapVectorClock, Has
         this.counters = counters;
     }
 
-    @Override
+
     public void increment() {
         this.counters.put(this.id, this.counters.getOrDefault(this.id, 0L) + 1);
     }
 
-    @Override
+
     public void merge(MapVectorClock other) {
         for (String key : other.counters.keySet()) {
             this.counters.put(
@@ -41,7 +41,7 @@ public final class MapVectorClock implements BaseVectorClock<MapVectorClock, Has
         }
     }
 
-    @Override
+
     public boolean happensBefore(MapVectorClock other) {
         var clocks = other.counters.size() > this.counters.size() ? other.counters : this.counters;
         boolean strictlyLess = false;
@@ -62,27 +62,27 @@ public final class MapVectorClock implements BaseVectorClock<MapVectorClock, Has
         return strictlyLess;
     }
 
-    @Override
+
     public boolean happensAfter(MapVectorClock other) {
         return other.happensBefore(this);
     }
 
-    @Override
+
     public boolean isConcurrent(MapVectorClock other) {
         return !happensBefore(other) && !happensAfter(other);
     }
 
-    @Override
+
     public MapVectorClock duplicate() {
         return new MapVectorClock(this.id, new HashMap<>(this.counters));
     }
 
-    @Override
+
     public String getId() {
         return this.id;
     }
 
-    @Override
+
     public HashMap<String, Long> getClock() {
         return new HashMap<>(this.counters);
     }
@@ -133,7 +133,7 @@ public final class MapVectorClock implements BaseVectorClock<MapVectorClock, Has
         return findIndex(clock, clocks, left, mp);
     }
 
-    @Override
+
     public String toString() {
         return "MapVectorClock{" +
                 "counters=" + counters +

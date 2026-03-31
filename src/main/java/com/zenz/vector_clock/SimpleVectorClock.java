@@ -2,16 +2,17 @@ package com.zenz.vector_clock;
 
 import java.util.Arrays;
 
-public final class DistributedVectorClock implements VectorClock {
+//public final class SimpleVectorClock implements VectorClock {
+public final class SimpleVectorClock {
     private long[] vectorClock;
     private final int id;
 
-    public DistributedVectorClock(int id) {
+    public SimpleVectorClock(int id) {
         this.id = id;
         this.vectorClock = new long[id + 1];
     }
 
-    public DistributedVectorClock(long[] vectorClock, int id) {
+    public SimpleVectorClock(long[] vectorClock, int id) {
         if (id < 0 || id >= vectorClock.length) {
             throw new IllegalArgumentException("Invalid node id");
         }
@@ -24,8 +25,7 @@ public final class DistributedVectorClock implements VectorClock {
         vectorClock[id]++;
     }
 
-    @Override
-    public void merge(VectorClock other) {
+    public void merge(SimpleVectorClock other) {
         long[] otherClock = other.getVectorClock();
         ensureCapacity(otherClock.length);
 
@@ -59,8 +59,7 @@ public final class DistributedVectorClock implements VectorClock {
      * @param other the vector clock to compare against
      * @return {@code true} if this clock happens before {@code other}, otherwise {@code false}
      */
-    @Override
-    public boolean happensBefore(VectorClock other) {
+    public boolean happensBefore(SimpleVectorClock other) {
         if (Arrays.stream(vectorClock).allMatch(v -> v == 0L)) {
             throw new VectorClockException("Node " + id + " has empty vector clock");
         }
@@ -87,18 +86,15 @@ public final class DistributedVectorClock implements VectorClock {
         return strictlyLess;
     }
 
-    @Override
-    public boolean happensAfter(VectorClock other) {
+    public boolean happensAfter(SimpleVectorClock other) {
         return other.happensBefore(this);
     }
 
-    @Override
-    public boolean isConcurrent(VectorClock other) {
+    public boolean isConcurrent(SimpleVectorClock other) {
         if (Arrays.equals(vectorClock, other.getVectorClock())) return false;
         return !happensBefore(other) && !happensAfter(other);
     }
 
-    @Override
     public long[] getVectorClock() {
         return Arrays.copyOf(vectorClock, vectorClock.length);
     }
@@ -109,21 +105,18 @@ public final class DistributedVectorClock implements VectorClock {
         }
     }
 
-    @Override
     public int getId() {
         return id;
     }
 
-    @Override
-    public DistributedVectorClock duplicate() {
-        DistributedVectorClock newVectorClock = new DistributedVectorClock(this.id);
+    public SimpleVectorClock duplicate() {
+        SimpleVectorClock newVectorClock = new SimpleVectorClock(this.id);
         newVectorClock.vectorClock = Arrays.copyOf(vectorClock, vectorClock.length);
         return newVectorClock;
     }
 
-    @Override
     public String toString() {
-        return "DistributedVectorClock{" +
+        return "SimpleVectorClock{" +
                 "vectorClock=" + Arrays.toString(vectorClock) +
                 ", id=" + id +
                 '}';
