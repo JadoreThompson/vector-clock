@@ -1,6 +1,9 @@
 package com.zenz.vector_clock;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Maintains a hash map to keep track of each node's counter
@@ -76,11 +79,65 @@ public final class MapVectorClock implements BaseVectorClock<MapVectorClock, Has
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public HashMap<String, Long> getClock() {
         return new HashMap<>(this.counters);
+    }
+
+    public static List<List<MapVectorClock>> sort(List<MapVectorClock> clocks) {
+        List<List<MapVectorClock>> sortedClocks = new ArrayList<>();
+
+        for (MapVectorClock clock : clocks) {
+            if (sortedClocks.isEmpty()) {
+                sortedClocks.add(new ArrayList<>());
+                sortedClocks.getFirst().add(clock);
+                continue;
+            }
+
+            AbstractMap.SimpleEntry<Integer, Boolean> result = findIndex(clock, sortedClocks, 0, sortedClocks.size());
+            List<MapVectorClock> clockList;
+            if (!result.getValue()) {
+                clockList = sortedClocks.get(result.getKey());
+            } else {
+                clockList = new ArrayList<>();
+                sortedClocks.add(result.getKey(), clockList);
+            }
+
+            clockList.add(clock);
+        }
+
+        return sortedClocks;
+    }
+
+    private static AbstractMap.SimpleEntry<Integer, Boolean> findIndex(MapVectorClock clock, List<List<MapVectorClock>> clocks, final int left, final int right) {
+        final int mp = (left + right) / 2;
+        final MapVectorClock mpClock = clocks.get(mp).getFirst();
+
+        if (mpClock.isConcurrent(clock)) {
+            return new AbstractMap.SimpleEntry<>(mp, false);
+        }
+
+        if (mpClock.happensBefore(clock)) {
+            if (left == right) {
+                return new AbstractMap.SimpleEntry<>(mp + 1, true);
+            }
+            return findIndex(clock, clocks, mp + 1, right);
+        }
+
+        if (left == right) {
+            return new AbstractMap.SimpleEntry<>(mp, true);
+        }
+        return findIndex(clock, clocks, left, mp);
+    }
+
+    @Override
+    public String toString() {
+        return "MapVectorClock{" +
+                "counters=" + counters +
+                ", id='" + id + '\'' +
+                '}';
     }
 }
